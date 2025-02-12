@@ -1,12 +1,20 @@
 #[macro_use] extern crate rocket;
+#[macro_use] extern crate diesel;
 
+
+use diesel::*;
+use dotenvy::dotenv;
 use rocket::serde::json::Json;
 use serde::{Serialize, Deserialize};
+use std::env;
 
-#[derive(Serialize, Deserialize)]
+mod schema;
+
+
 // u32 is an unsigned 32-bit integer
 // f64 64-bit floating point number
-struct Card {
+#[derive(Queryable)]
+pub struct Card {
     id: u32,
     name: String,
     rarity: String,
@@ -20,34 +28,18 @@ struct Card {
 
 }
 
+fn establish_connection() -> PgConnection {
+    dotenv().ok();
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url))
+}
+
 #[get("/cards")]
 fn get_cards() -> Json<Vec<Card>> {
-    let sample_cards = vec! [
-        Card {
-            id: 1, name: "Blue-Eyes White Dragon".to_string(),
-            rarity: "Ultra Rare".to_string(),
-            price: 50.0,
-            set: "".to_string(),
-            year: 0,
-            condition: "".to_string(),
-            image_url: "".to_string(),
-            card_type: "".to_string(),
-            language: "".to_string(),
-        },
-        Card {
-            id: 2,
-            name: "Charizard".to_string(),
-            rarity: "Holo Rare".to_string(),
-            price: 120.0,
-            set: "".to_string(),
-            year: 0,
-            condition: "".to_string(),
-            image_url: "".to_string(),
-            card_type: "".to_string(),
-            language: "".to_string(),
-        },
-        ];
-        Json(sample_cards)
-    }
+    use schema::cards::dsl::*;
+    let connection = establish_connection();
+    let results = cards.load::<Card>(&connection).expect("Error loading cards");
+    Json(results)
+}
 #[launch]
 fn rocket() -> _ {rocket::build().mount("/api", routes![get_cards])}
