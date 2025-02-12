@@ -1,0 +1,7 @@
+# Ignore .env file that contains sensitive data
+.env
+
+# Ignore other build files and directories
+target/
+node_modules/
+*.log
