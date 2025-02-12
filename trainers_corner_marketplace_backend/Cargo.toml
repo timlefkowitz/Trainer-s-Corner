@@ -1,0 +1,16 @@
+[package]
+name = "trainers_corner_marketplace_backend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+rocket = { version = "0.5", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.0", features = ["full"] }
+diesel = { version = "2.1", features = ["postgres", "r2d2"] } # For PostgreSQL
+dotenvy = "0.15" # For environment variables
+
+
+

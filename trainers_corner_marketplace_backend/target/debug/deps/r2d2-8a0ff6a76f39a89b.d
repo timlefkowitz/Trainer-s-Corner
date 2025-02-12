@@ -1,0 +1,10 @@
+/Users/timothylefkowitz/projects/trainers_corner/trainers_corner_marketplace_backend/target/debug/deps/libr2d2-8a0ff6a76f39a89b.rmeta: /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/r2d2-0.8.10/src/lib.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/r2d2-0.8.10/src/config.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/r2d2-0.8.10/src/event.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/r2d2-0.8.10/src/extensions.rs
+
+/Users/timothylefkowitz/projects/trainers_corner/trainers_corner_marketplace_backend/target/debug/deps/libr2d2-8a0ff6a76f39a89b.rlib: /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/r2d2-0.8.10/src/lib.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/r2d2-0.8.10/src/config.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/r2d2-0.8.10/src/event.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/r2d2-0.8.10/src/extensions.rs
+
+/Users/timothylefkowitz/projects/trainers_corner/trainers_corner_marketplace_backend/target/debug/deps/r2d2-8a0ff6a76f39a89b.d: /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/r2d2-0.8.10/src/lib.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/r2d2-0.8.10/src/config.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/r2d2-0.8.10/src/event.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/r2d2-0.8.10/src/extensions.rs
+
+/Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/r2d2-0.8.10/src/lib.rs:
+/Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/r2d2-0.8.10/src/config.rs:
+/Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/r2d2-0.8.10/src/event.rs:
+/Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/r2d2-0.8.10/src/extensions.rs:

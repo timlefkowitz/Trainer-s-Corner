@@ -1,0 +1,10 @@
+/Users/timothylefkowitz/projects/trainers_corner/trainers_corner_marketplace_backend/target/debug/deps/libspin-bcd14123a6efd9bc.rmeta: /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spin-0.9.8/src/lib.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spin-0.9.8/src/mutex.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spin-0.9.8/src/mutex/spin.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spin-0.9.8/src/relax.rs
+
+/Users/timothylefkowitz/projects/trainers_corner/trainers_corner_marketplace_backend/target/debug/deps/libspin-bcd14123a6efd9bc.rlib: /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spin-0.9.8/src/lib.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spin-0.9.8/src/mutex.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spin-0.9.8/src/mutex/spin.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spin-0.9.8/src/relax.rs
+
+/Users/timothylefkowitz/projects/trainers_corner/trainers_corner_marketplace_backend/target/debug/deps/spin-bcd14123a6efd9bc.d: /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spin-0.9.8/src/lib.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spin-0.9.8/src/mutex.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spin-0.9.8/src/mutex/spin.rs /Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spin-0.9.8/src/relax.rs
+
+/Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spin-0.9.8/src/lib.rs:
+/Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spin-0.9.8/src/mutex.rs:
+/Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spin-0.9.8/src/mutex/spin.rs:
+/Users/timothylefkowitz/.cargo/registry/src/index.crates.io-6f17d22bba15001f/spin-0.9.8/src/relax.rs:
