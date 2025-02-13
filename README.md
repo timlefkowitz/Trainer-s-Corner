@@ -35,6 +35,7 @@
 	4. Deck Builder – Let users create and manage decks.
 
 	5. Buy/Sell System – Simulate a marketplace where users can list cards for sale and purchase.
+ State tail state sales tax
 
 	6. Scanner/Recognition (Optional) – Implement image recognition or barcode scanning for card identification.
 
