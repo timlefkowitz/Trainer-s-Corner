@@ -14,3 +14,4 @@ diesel::table! {
         language -> Nullable<Text>,
     }
 }
+
