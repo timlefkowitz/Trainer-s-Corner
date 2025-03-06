@@ -28,7 +28,7 @@
 
 	1. Card Database Management – Store and manage a collection of trading cards.
 
-	2. Search & Filtering – Allow users to search for cards by name, type, rarity, or set.
+	2. Search & Filtering – Allow users to search for cards by name, type, rarity, illustration artist or set.
 
 	3. Pricing System – Implement price tracking and market trends.
 	
