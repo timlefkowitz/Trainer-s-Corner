@@ -86,3 +86,7 @@ If this is meant for your NFT app (e.g., analyzing ArtworkNFT conditions), these
 
 Evaluating wear, damage, or authenticity of digital/physical cards.
 Displaying results in the ArtworkCard component (e.g., "Condition: Good" based on AI analysis).
+
+
+
+the trainers corner app strives to provide collectors with the most accurate market data for every single pokemon card on the market. 
