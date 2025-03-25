@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ethers } from 'ethers';
+import { BrowserRouter as Router, Route, Routes, Link, useNavigate, useParams } from 'react-router-dom';
 import { Container, Typography, Box, AppBar, Toolbar, Button, TextField, Menu, MenuItem } from '@mui/material';
 import { LineChart } from '@mui/x-charts/LineChart';
 import SearchIcon from '@mui/icons-material/Search';
@@ -9,9 +9,10 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArtworkCard from './components/ArtworkCard';
-import contractABI from './contract/ArtworkNFT.json';
 import '@fontsource/press-start-2p';
 import './App.css';
+import { ethers } from 'ethers';
+import contractABI from './contract/ArtworkNFT.json';
 
 const contractAddress = '0xYourDeployedContractAddress';
 
@@ -32,7 +33,245 @@ interface Card {
     language?: string | null;
 }
 
-const App: React.FC = () => {
+// Landing Page
+const LandingPage: React.FC = () => (
+    <Container
+        maxWidth="lg"
+        sx={{
+            py: 4,
+            mt: 8,
+            backgroundColor: '#02735E',
+            color: '#F27405',
+            minHeight: 'calc(100vh - 64px)',
+            textAlign: 'center',
+        }}
+    >
+        <Typography
+            variant="h3"
+            gutterBottom
+            sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '1.5rem', sm: '2rem' } }}
+        >
+            WELCOME TO TRAINERS CORNER
+        </Typography>
+        <Typography
+            sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '0.75rem', sm: '1rem' }, color: '#03A678' }}
+        >
+            Explore Pokémon card sets, track prices, and dive into the market!
+        </Typography>
+        <Button
+            component={Link}
+            to="/sets"
+            sx={{
+                mt: 4,
+                fontFamily: '"Press Start 2P", cursive',
+                color: '#F27405',
+                backgroundColor: '#014040',
+                border: '2px solid #03A678',
+                fontSize: '1rem',
+                padding: '0.5rem 1rem',
+                '&:hover': { backgroundColor: '#02735E' },
+            }}
+        >
+            VIEW SETS
+        </Button>
+    </Container>
+);
+
+// Card List Page
+const CardList: React.FC = () => {
+    const [sets, setSets] = useState<Set[]>([]);
+    const [selectedSet, setSelectedSet] = useState<string | null>(null);
+    const [cards, setCards] = useState<Card[]>([]);
+    const [loadingSets, setLoadingSets] = useState<boolean>(true);
+    const [loadingCards, setLoadingCards] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const navigate = useNavigate();
+
+    const fetchSets = async () => {
+        try {
+            const response = await fetch('/api/sets');
+            if (!response.ok) throw new Error(`Failed to fetch sets: ${response.status}`);
+            const data = await response.json();
+            setSets(data);
+            setLoadingSets(false);
+        } catch (err: unknown) { // Changed to unknown
+            console.error('Fetch sets error:', err);
+            if (err instanceof Error) {
+                setError(err.message || 'Error fetching sets');
+            } else {
+                setError('Unknown error occurred');
+            }
+            setLoadingSets(false);
+        }
+    };
+
+    const fetchCards = async (setName: string) => {
+        setLoadingCards(true);
+        try {
+            const response = await fetch(`/api/cards?set=${encodeURIComponent(setName)}`);
+            if (!response.ok) throw new Error(`Failed to fetch cards: ${response.status}`);
+            const data = await response.json();
+            setCards(data);
+            setLoadingCards(false);
+        } catch (err: unknown) { // Changed to unknown
+            console.error('Fetch cards error:', err);
+            if (err instanceof Error) {
+                setError(err.message || 'Error fetching cards');
+            } else {
+                setError('Unknown error occurred');
+            }
+            setLoadingCards(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchSets();
+    }, []);
+
+    const handleSetsClick = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleSetSelect = (setName: string) => {
+        setSelectedSet(setName);
+        fetchCards(setName);
+        setAnchorEl(null);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    return (
+        <Container
+            maxWidth="lg"
+            sx={{
+                py: 4,
+                mt: 8,
+                backgroundColor: '#02735E',
+                color: '#F27405',
+                minHeight: 'calc(100vh - 64px)',
+            }}
+        >
+            <Typography
+                variant="h3"
+                align="center"
+                gutterBottom
+                sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '1rem', sm: '1.5rem' } }}
+            >
+                {selectedSet ? `${selectedSet} CARDS` : 'SELECT A SET'}
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                <Button
+                    sx={{
+                        fontFamily: '"Press Start 2P", cursive',
+                        color: '#03A678',
+                        backgroundColor: '#014040',
+                        border: '2px solid #03A678',
+                        fontSize: { xs: '0.75rem', sm: '1rem' },
+                        padding: '0.25rem 0.5rem',
+                        '&:hover': { backgroundColor: '#02735E' },
+                    }}
+                    startIcon={<CollectionsIcon sx={{ color: '#F27405' }} />}
+                    onClick={handleSetsClick}
+                >
+                    SETS
+                    <ArrowDropDownIcon sx={{ color: '#F27405' }} />
+                </Button>
+                <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                    PaperProps={{
+                        sx: {
+                            backgroundColor: '#014040',
+                            border: '2px solid #03A678',
+                            color: '#F27405',
+                            fontFamily: '"Press Start 2P", cursive',
+                        },
+                    }}
+                >
+                    {loadingSets ? (
+                        <MenuItem>Loading...</MenuItem>
+                    ) : error ? (
+                        <MenuItem>{error}</MenuItem>
+                    ) : sets.length === 0 ? (
+                        <MenuItem>No sets found</MenuItem>
+                    ) : (
+                        sets.map((set) => (
+                            <MenuItem key={set.name} onClick={() => handleSetSelect(set.name)}>
+                                {set.name}
+                            </MenuItem>
+                        ))
+                    )}
+                </Menu>
+            </Box>
+            {selectedSet && (
+                <Box sx={{ mt: 4, p: 2, bgcolor: '#014040', border: '2px solid #03A678' }}>
+                    <Typography
+                        variant="h5"
+                        gutterBottom
+                        sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '0.875rem', sm: '1.25rem' }, color: '#F27405' }}
+                    >
+                        {selectedSet} CARDS
+                    </Typography>
+                    {loadingCards ? (
+                        <Typography sx={{ fontFamily: '"Press Start 2P", cursive', color: '#03A678' }}>
+                            Loading cards...
+                        </Typography>
+                    ) : error ? (
+                        <Typography sx={{ fontFamily: '"Press Start 2P", cursive', color: '#03A678' }}>
+                            {error}
+                        </Typography>
+                    ) : cards.length === 0 ? (
+                        <Typography sx={{ fontFamily: '"Press Start 2P", cursive', color: '#03A678' }}>
+                            No cards found for this set.
+                        </Typography>
+                    ) : (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                            {cards.map((card) => (
+                                <Box
+                                    key={card.id}
+                                    onClick={() => navigate(`/cards/${card.id}`)}
+                                    sx={{
+                                        bgcolor: '#333',
+                                        border: '2px solid #fff',
+                                        p: 1,
+                                        width: { xs: '100%', sm: '200px' },
+                                        cursor: 'pointer',
+                                        '&:hover': { bgcolor: '#444' },
+                                    }}
+                                >
+                                    <Typography
+                                        sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: '0.75rem', color: '#fff' }}
+                                    >
+                                        {card.name}
+                                    </Typography>
+                                    <Typography
+                                        sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: '0.6rem', color: '#03A678' }}
+                                    >
+                                        {card.rarity}
+                                    </Typography>
+                                    <Typography
+                                        sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: '0.6rem', color: '#F27405' }}
+                                    >
+                                        ${card.price.toFixed(2)}
+                                    </Typography>
+                                </Box>
+                            ))}
+                        </Box>
+                    )}
+                </Box>
+            )}
+        </Container>
+    );
+};
+
+/// Card Detail Page
+const CardDetail: React.FC = () => {
+    const { id } = useParams<{ id: string }>();
+    const [card, setCard] = useState<Card | null>(null);
     const [currentOwner, setCurrentOwner] = useState<string>('Loading...');
     const [salePrice, setSalePrice] = useState<string>('Loading...');
     const [saleDate, setSaleDate] = useState<string>('Loading...');
@@ -40,58 +279,146 @@ const App: React.FC = () => {
         dates: ['01/01/2025', '01/15/2025', '02/01/2025', '02/15/2025', '03/01/2025'],
         prices: [1.2, 1.8, 2.5, 2.0, 3.0],
     });
-    const [walletAddress, setWalletAddress] = useState<string | null>(null);
-    const [sets, setSets] = useState<Set[]>([]);
-    const [selectedSet, setSelectedSet] = useState<string | null>(null);
-    const [cards, setCards] = useState<Card[]>([]); // New state for cards
-    const [loadingCards, setLoadingCards] = useState<boolean>(false);
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [loadingSets, setLoadingSets] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    const loadArtworkData = async (tokenId: number = 1) => {
+    const fetchCard = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`/api/cards/${id}`);
+            if (!response.ok) throw new Error(`Failed to fetch card: ${response.status}`);
+            const data = await response.json();
+            setCard(data);
+            // Placeholder data until real sale history is implemented
+            setCurrentOwner('0x1234...5678');
+            setSalePrice(`$${data.price.toFixed(2)}`);
+            setSaleDate('03/24/2025');
+            setLoading(false);
+        } catch (err: unknown) { // Changed to unknown
+            console.error('Fetch card error:', err);
+            if (err instanceof Error) {
+                setError(err.message || 'Error fetching card');
+            } else {
+                setError('Unknown error occurred');
+            }
+            setLoading(false);
+        }
+    };
+
+    const loadArtworkData = async () => {
         if (!window.ethereum) {
             console.log('No Ethereum provider detected');
-            alert('Please install MetaMask or another Web3 wallet!');
             setCurrentOwner('No wallet detected');
             setSalePrice('N/A');
             setSaleDate('N/A');
             return;
         }
-
         try {
             const provider = new ethers.BrowserProvider(window.ethereum);
             const contract = new ethers.Contract(contractAddress, contractABI.abi, provider);
-            const saleHistory = (await contract.getSaleHistory(tokenId)) as any[];
+            const saleHistory = (await contract.getSaleHistory(Number(id))) as any[];
             if (saleHistory.length === 0) {
                 setCurrentOwner('No sales yet');
                 setSalePrice('N/A');
                 setSaleDate('N/A');
                 return;
             }
-
             const formattedHistory = saleHistory.map((sale) => ({
                 price: Number(ethers.formatEther(sale.price)),
                 owner: sale.owner as string,
                 date: new Date(Number(sale.date) * 1000).toLocaleDateString(),
             }));
-
             setChartData({
                 dates: formattedHistory.map((sale) => sale.date),
                 prices: formattedHistory.map((sale) => sale.price),
             });
-
             const latestSale = formattedHistory[formattedHistory.length - 1];
             setCurrentOwner(latestSale.owner);
             setSalePrice(`${latestSale.price} ETH`);
             setSaleDate(latestSale.date);
         } catch (error) {
-            console.error('Error fetching data:', error);
+            console.error('Error fetching sale data:', error);
             setCurrentOwner('Error fetching data');
             setSalePrice('N/A');
             setSaleDate('N/A');
         }
     };
+
+    useEffect(() => {
+        fetchCard();
+        // loadArtworkData(); // Uncomment if integrating with NFT contract
+    }, [id]);
+
+    return (
+        <Container
+            maxWidth="lg"
+            sx={{
+                py: 4,
+                mt: 8,
+                backgroundColor: '#02735E',
+                color: '#F27405',
+                minHeight: 'calc(100vh - 64px)',
+            }}
+        >
+            {loading ? (
+                <Typography
+                    variant="h3"
+                    align="center"
+                    sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '1rem', sm: '1.5rem' } }}
+                >
+                    LOADING...
+                </Typography>
+            ) : error ? (
+                <Typography
+                    variant="h3"
+                    align="center"
+                    sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '1rem', sm: '1.5rem' } }}
+                >
+                    {error}
+                </Typography>
+            ) : (
+                <>
+                    <Typography
+                        variant="h3"
+                        align="center"
+                        gutterBottom
+                        sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '1rem', sm: '1.5rem' } }}
+                    >
+                        {card ? `${card.name} (${card.set})` : 'CARD DETAILS'}
+                    </Typography>
+                    <Typography
+                        variant="h6"
+                        align="center"
+                        sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '0.75rem', sm: '1rem' }, color: '#03A678' }}
+                    >
+                        OWNER: {currentOwner}
+                    </Typography>
+                    <Box sx={{ mt: 4, p: 2, bgcolor: '#014040', border: '2px solid #03A678' }}>
+                        <Typography
+                            variant="h5"
+                            gutterBottom
+                            sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '0.875rem', sm: '1.25rem' }, color: '#F27405' }}
+                        >
+                            SALE HISTORY
+                        </Typography>
+                        <LineChart
+                            xAxis={[{ data: chartData.dates, label: 'DATE', tickFontSize: 10 }]}
+                            series={[{ data: chartData.prices, label: 'PRICE (ETH)', color: '#F27405' }]}
+                            height={300}
+                            margin={{ top: 20, bottom: 50, left: 50, right: 20 }}
+                            sx={{ '& .MuiChartsAxis-tickLabel': { fontFamily: '"Press Start 2P", cursive', fill: '#03A678' } }}
+                        />
+                    </Box>
+                    <ArtworkCard salePrice={salePrice} saleDate={saleDate} />
+                </>
+            )}
+        </Container>
+    );
+};
+
+// Main App Component
+const App: React.FC = () => {
+    const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
     const connectWallet = async () => {
         if (!window.ethereum) {
@@ -107,62 +434,8 @@ const App: React.FC = () => {
         }
     };
 
-    const fetchSets = async () => {
-        try {
-            const response = await fetch('/api/sets');
-            if (!response.ok) throw new Error(`Failed to fetch sets: ${response.status}`);
-            const data = await response.json();
-            console.log('Fetched sets:', data);
-            setSets(data);
-            setLoadingSets(false);
-        } catch (err) {
-            setLoadingSets(false);
-            console.error('Fetch error:', err);
-        }
-    };
-
-    const fetchCards = async (setName: string) => {
-        setLoadingCards(true);
-        try {
-            const response = await fetch(`/api/cards?set=${encodeURIComponent(setName)}`);
-            if (!response.ok) throw new Error(`Failed to fetch cards: ${response.status}`);
-            const data = await response.json();
-            console.log(`Fetched cards for ${setName}:`, data);
-            setCards(data);
-        } catch (err) {
-            console.error('Fetch cards error:', err);
-            if (err instanceof Error) {
-                setError(err.message || 'Error fetching cards');
-            } else {
-                setError('Error fetching cards');
-            }
-        } finally {
-            setLoadingCards(false);
-        }
-    };
-
-    const handleSetsClick = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleSetSelect = (setName: string) => {
-        setSelectedSet(setName);
-        setAnchorEl(null);
-        fetchCards(setName); // Fetch cards when a set is selected
-        console.log(`Selected set: ${setName}`);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
-    useEffect(() => {
-        fetchSets();
-        // loadArtworkData(1); // Uncomment if you want default NFT data
-    }, []);
-
     return (
-        <>
+        <Router>
             <AppBar
                 position="fixed"
                 elevation={0}
@@ -195,18 +468,17 @@ const App: React.FC = () => {
                     >
                         trainersCorner
                     </Typography>
-
                     <Box sx={{ display: 'flex', gap: { xs: 0.25, sm: 0.5 } }}>
                         <Button
+                            component={Link}
+                            to="/"
                             sx={{
                                 fontFamily: '"Press Start 2P", cursive',
                                 color: '#03A678',
                                 backgroundColor: '#014040',
                                 border: '2px solid #03A678',
-                                borderRadius: 0,
                                 fontSize: { xs: '0.4rem', sm: '0.75rem' },
                                 padding: { xs: '0.1rem 0.2rem', sm: '0.25rem 0.5rem' },
-                                minWidth: 'auto',
                                 '&:hover': { backgroundColor: '#02735E' },
                             }}
                             startIcon={<HomeIcon sx={{ color: '#F27405', fontSize: { xs: 16, sm: 24 } }} />}
@@ -216,69 +488,31 @@ const App: React.FC = () => {
                             </Box>
                         </Button>
                         <Button
+                            component={Link}
+                            to="/sets"
                             sx={{
                                 fontFamily: '"Press Start 2P", cursive',
                                 color: '#03A678',
                                 backgroundColor: '#014040',
                                 border: '2px solid #03A678',
-                                borderRadius: 0,
                                 fontSize: { xs: '0.4rem', sm: '0.75rem' },
                                 padding: { xs: '0.1rem 0.2rem', sm: '0.25rem 0.5rem' },
-                                minWidth: 'auto',
                                 '&:hover': { backgroundColor: '#02735E' },
                             }}
                             startIcon={<CollectionsIcon sx={{ color: '#F27405', fontSize: { xs: 16, sm: 24 } }} />}
-                            onClick={handleSetsClick}
                         >
                             <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
                                 SETS
                             </Box>
-                            <ArrowDropDownIcon sx={{ color: '#F27405', fontSize: { xs: 16, sm: 24 } }} />
                         </Button>
-                        <Menu
-                            anchorEl={anchorEl}
-                            open={Boolean(anchorEl)}
-                            onClose={handleClose}
-                            PaperProps={{
-                                sx: {
-                                    backgroundColor: '#014040',
-                                    border: '2px solid #03A678',
-                                    color: '#F27405',
-                                    fontFamily: '"Press Start 2P", cursive',
-                                },
-                            }}
-                        >
-                            {loadingSets ? (
-                                <MenuItem sx={{ fontSize: { xs: '0.5rem', sm: '0.75rem' } }}>Loading...</MenuItem>
-                            ) : error ? (
-                                <MenuItem sx={{ fontSize: { xs: '0.5rem', sm: '0.75rem' } }}>{error}</MenuItem>
-                            ) : sets.length === 0 ? (
-                                <MenuItem sx={{ fontSize: { xs: '0.5rem', sm: '0.75rem' } }}>No sets found</MenuItem>
-                            ) : (
-                                sets.map((set) => (
-                                    <MenuItem
-                                        key={set.name}
-                                        onClick={() => handleSetSelect(set.name)}
-                                        sx={{
-                                            fontSize: { xs: '0.5rem', sm: '0.75rem' },
-                                            '&:hover': { backgroundColor: '#02735E' },
-                                        }}
-                                    >
-                                        {set.name}
-                                    </MenuItem>
-                                ))
-                            )}
-                        </Menu>
                         <Button
                             sx={{
                                 fontFamily: '"Press Start 2P", cursive',
                                 color: '#03A678',
                                 backgroundColor: '#014040',
                                 border: '2px solid #03A678',
-                                borderRadius: 0,
                                 fontSize: { xs: '0.4rem', sm: '0.75rem' },
                                 padding: { xs: '0.1rem 0.2rem', sm: '0.25rem 0.5rem' },
-                                minWidth: 'auto',
                                 '&:hover': { backgroundColor: '#02735E' },
                             }}
                             startIcon={<BarChartIcon sx={{ color: '#F27405', fontSize: { xs: 16, sm: 24 } }} />}
@@ -288,7 +522,6 @@ const App: React.FC = () => {
                             </Box>
                         </Button>
                     </Box>
-
                     <Box
                         sx={{
                             display: 'flex',
@@ -317,7 +550,6 @@ const App: React.FC = () => {
                             InputProps={{ disableUnderline: true }}
                         />
                     </Box>
-
                     <Button
                         variant="contained"
                         onClick={connectWallet}
@@ -326,10 +558,8 @@ const App: React.FC = () => {
                             backgroundColor: '#731702',
                             color: '#F27405',
                             border: '2px solid #F27405',
-                            borderRadius: 0,
                             fontSize: { xs: '0.4rem', sm: '0.75rem' },
                             padding: { xs: '0.1rem 0.2rem', sm: '0.25rem 0.5rem' },
-                            minWidth: 'auto',
                             '&:hover': { backgroundColor: '#02735E' },
                         }}
                         startIcon={<AccountBalanceWalletIcon sx={{ color: '#F27405', fontSize: { xs: 16, sm: 24 } }} />}
@@ -340,128 +570,12 @@ const App: React.FC = () => {
                     </Button>
                 </Toolbar>
             </AppBar>
-
-            <Container
-                maxWidth="lg"
-                sx={{
-                    py: 4,
-                    mt: 8,
-                    backgroundColor: '#02735E',
-                    color: '#F27405',
-                    minHeight: 'calc(100vh - 64px)',
-                }}
-            >
-                <Typography
-                    variant="h3"
-                    align="center"
-                    gutterBottom
-                    sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '1rem', sm: '1.5rem' } }}
-                >
-                    {selectedSet ? `${selectedSet} CARDS` : 'ART #1'}
-                </Typography>
-                <Typography
-                    variant="h6"
-                    align="center"
-                    sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '0.75rem', sm: '1rem' }, color: '#03A678' }}
-                >
-                    OWNER: {currentOwner}
-                </Typography>
-
-                {selectedSet ? (
-                    <Box
-                        sx={{
-                            mt: 4,
-                            p: 2,
-                            bgcolor: '#014040',
-                            border: '2px solid #03A678',
-                        }}
-                    >
-                        <Typography
-                            variant="h5"
-                            gutterBottom
-                            sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '0.875rem', sm: '1.25rem' }, color: '#F27405' }}
-                        >
-                            {selectedSet} CARDS
-                        </Typography>
-                        {loadingCards ? (
-                            <Typography
-                                sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '0.75rem', sm: '1rem' }, color: '#03A678' }}
-                            >
-                                Loading cards...
-                            </Typography>
-                        ) : error ? (
-                            <Typography
-                                sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '0.75rem', sm: '1rem' }, color: '#03A678' }}
-                            >
-                                {error}
-                            </Typography>
-                        ) : cards.length === 0 ? (
-                            <Typography
-                                sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '0.75rem', sm: '1rem' }, color: '#03A678' }}
-                            >
-                                No cards found for this set.
-                            </Typography>
-                        ) : (
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                                {cards.map((card) => (
-                                    <Box
-                                        key={card.id}
-                                        sx={{
-                                            bgcolor: '#333',
-                                            border: '2px solid #fff',
-                                            p: 1,
-                                            width: { xs: '100%', sm: '200px' },
-                                        }}
-                                    >
-                                        <Typography
-                                            sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: '0.75rem', color: '#fff' }}
-                                        >
-                                            {card.name}
-                                        </Typography>
-                                        <Typography
-                                            sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: '0.6rem', color: '#03A678' }}
-                                        >
-                                            {card.rarity}
-                                        </Typography>
-                                        <Typography
-                                            sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: '0.6rem', color: '#F27405' }}
-                                        >
-                                            ${card.price.toFixed(2)}
-                                        </Typography>
-                                    </Box>
-                                ))}
-                            </Box>
-                        )}
-                    </Box>
-                ) : (
-                    <Box
-                        sx={{
-                            mt: 4,
-                            p: 2,
-                            bgcolor: '#014040',
-                            border: '2px solid #03A678',
-                        }}
-                    >
-                        <Typography
-                            variant="h5"
-                            gutterBottom
-                            sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '0.875rem', sm: '1.25rem' }, color: '#F27405' }}
-                        >
-                            SALE HIST
-                        </Typography>
-                        <LineChart
-                            xAxis={[{ data: chartData.dates, label: 'DATE', tickFontSize: 10 }]}
-                            series={[{ data: chartData.prices, label: 'PRICE (ETH)', color: '#F27405' }]}
-                            height={300}
-                            margin={{ top: 20, bottom: 50, left: 50, right: 20 }}
-                            sx={{ '& .MuiChartsAxis-tickLabel': { fontFamily: '"Press Start 2P", cursive', fill: '#03A678' } }}
-                        />
-                    </Box>
-                )}
-
-                {!selectedSet && <ArtworkCard salePrice={salePrice} saleDate={saleDate} />}
-            </Container>
-        </>
+            <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/sets" element={<CardList />} />
+                <Route path="/cards/:id" element={<CardDetail />} />
+            </Routes>
+        </Router>
     );
 };
 

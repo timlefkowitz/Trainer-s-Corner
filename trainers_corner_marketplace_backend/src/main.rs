@@ -36,17 +36,33 @@ async fn get_cards(pool: web::Data<DbPool>, query: Query<CardQuery>) -> impl Res
     let mut card_query = cards.into_boxed();
 
     if let Some(set_name) = &query.set {
-        card_query = card_query.filter(diesel::dsl::lower(set).eq(set_name.to_lowercase()));
+        card_query = card_query.filter(set.eq(set_name)); // Corrected to simple equality
     }
 
     match card_query.load::<models::Card>(&mut conn) {
         Ok(cards_list) => {
-            println!("Fetched {} cards for set {:?}", cards_list.len(), query.set);
+            println!("Fetched {} cards", cards_list.len());
             HttpResponse::Ok().json(cards_list)
         }
         Err(e) => {
             eprintln!("Error fetching cards: {:?}", e);
-            HttpResponse::InternalServerError().body(format!("Error fetching cards: {}", e))
+            HttpResponse::InternalServerError().body("Error fetching cards")
+        }
+    }
+}
+
+#[actix_web::get("/api/cards/{id}")]
+async fn get_card_by_id(pool: web::Data<DbPool>, path: web::Path<i32>) -> impl Responder {
+    use crate::schema::cards::dsl::*;
+
+    let card_id = path.into_inner();
+    let mut conn = pool.get().expect("Couldn't get DB connection");
+
+    match cards.filter(id.eq(card_id)).first::<models::Card>(&mut conn) {
+        Ok(card) => HttpResponse::Ok().json(card),
+        Err(e) => {
+            eprintln!("Error fetching card {}: {:?}", card_id, e);
+            HttpResponse::NotFound().body("Card not found")
         }
     }
 }
@@ -91,6 +107,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(pool.clone()))
             .service(get_cards)
+            .service(get_card_by_id)
             .service(get_sets)
     })
         .bind("127.0.0.1:8080")?
