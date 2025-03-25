@@ -44,17 +44,19 @@ const LandingPage: React.FC = () => (
             color: '#F27405',
             minHeight: 'calc(100vh - 64px)',
             textAlign: 'center',
+            marginTop: 20,
         }}
-    >
+    > <p></p>
+        <p></p>
         <Typography
             variant="h3"
             gutterBottom
             sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '1.5rem', sm: '2rem' } }}
         >
             WELCOME TO TRAINERS CORNER
-        </Typography>
+        </Typography><p></p>
         <Typography
-            sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '0.75rem', sm: '1rem' }, color: '#03A678' }}
+            sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: { xs: '0.75rem', sm: '2.5rem' }, color: '#262a29' }}
         >
             Explore Pokémon card sets, track prices, and dive into the market!
         </Typography>
