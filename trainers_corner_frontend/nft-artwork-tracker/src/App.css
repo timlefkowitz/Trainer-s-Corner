@@ -1,0 +1,22 @@
+/* Remove unused default styles and add custom ones */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+body {
+  background: linear-gradient(135deg, #02735E, #014040); /* Mid teal to dark teal */
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure content doesn't overlap fixed AppBar */
+main {
+  padding-top: 64px; /* Matches AppBar height */
+}
+
+/* Optional: Style for ArtworkCard if needed */
+.artwork-card {
+  background-color: #014040;
+  border: 2px solid #03A678;
+  color: #F27405;
+  font-family: 'Press Start 2P', cursive;
+}

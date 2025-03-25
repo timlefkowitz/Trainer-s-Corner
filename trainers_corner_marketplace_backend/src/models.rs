@@ -14,3 +14,8 @@ pub struct Card {
     pub card_type: Option<String>,
     pub language: Option<String>,
 }
+
+#[derive(Serialize)]
+pub struct Set {
+    pub name: String,
+}
