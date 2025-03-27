@@ -1,4 +1,6 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { createRoot } from 'react-dom/client';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
@@ -20,4 +22,11 @@ root.render(
         <CssBaseline />
         <App />
     </ThemeProvider>
+);
+
+const container = document.getElementById('root');
+root.render(
+    <GoogleOAuthProvider clientId="582169319592-oo3oa5155hb53k24vq9tfb12d4lhbbo9.apps.googleusercontent.com">
+        <App />
+    </GoogleOAuthProvider>
 );
