@@ -6,7 +6,7 @@ diesel::table! {
         name -> Text,
         rarity -> Text,
         price -> Double,
-        set -> Nullable<Text>, // Must match DB
+        set -> Nullable<Text>,
         year -> Nullable<SmallInt>,
         condition -> Nullable<Text>,
         image_url -> Nullable<Text>,

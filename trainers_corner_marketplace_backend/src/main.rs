@@ -1,42 +1,32 @@
-extern crate diesel;
-extern crate dotenv;
-
-use actix_web::{web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, web, App, HttpServer, HttpResponse, Responder};
 use diesel::prelude::*;
 use diesel::r2d2::{self, ConnectionManager};
-use dotenv::dotenv;
-use std::env;
-use actix_web::web::Query;
 use serde::Deserialize;
 
-pub mod schema;
-pub mod models;
+// Assuming these are in separate files
+mod models;
+mod schema;
 
 type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
-fn establish_connection() -> Result<DbPool, String> {
-    dotenv().ok();
-    let database_url = env::var("DATABASE_URL").map_err(|_| "DATABASE_URL must be set".to_string())?;
-    let manager = ConnectionManager::<PgConnection>::new(database_url);
-    r2d2::Pool::builder()
-        .build(manager)
-        .map_err(|_| "Failed to create database pool".to_string())
-}
-
 #[derive(Deserialize)]
-struct CardQuery {
+struct QueryParams {
     set: Option<String>,
+    search: Option<String>,
 }
 
-#[actix_web::get("/api/cards")]
-async fn get_cards(pool: web::Data<DbPool>, query: Query<CardQuery>) -> impl Responder {
+#[get("/api/cards")]
+async fn get_cards(pool: web::Data<DbPool>, query: web::Query<QueryParams>) -> impl Responder {
     use crate::schema::cards::dsl::*;
 
     let mut conn = pool.get().expect("Couldn't get DB connection");
     let mut card_query = cards.into_boxed();
 
     if let Some(set_name) = &query.set {
-        card_query = card_query.filter(set.eq(set_name)); // Corrected to simple equality
+        card_query = card_query.filter(set.ilike(set_name));
+    }
+    if let Some(search_term) = &query.search {
+        card_query = card_query.filter(name.ilike(format!("%{}%", search_term)));
     }
 
     match card_query.load::<models::Card>(&mut conn) {
@@ -51,42 +41,33 @@ async fn get_cards(pool: web::Data<DbPool>, query: Query<CardQuery>) -> impl Res
     }
 }
 
-#[actix_web::get("/api/cards/{id}")]
-async fn get_card_by_id(pool: web::Data<DbPool>, path: web::Path<i32>) -> impl Responder {
+#[get("/api/sets")]
+async fn get_sets(pool: web::Data<DbPool>, query: web::Query<QueryParams>) -> impl Responder {
     use crate::schema::cards::dsl::*;
 
-    let card_id = path.into_inner();
     let mut conn = pool.get().expect("Couldn't get DB connection");
+    let sets = if let Some(search_term) = &query.search {
+        cards
+            .select(set)
+            .distinct()
+            .filter(set.is_not_null())
+            .filter(set.ilike(format!("%{}%", search_term)))
+            .load::<Option<String>>(&mut conn)
+    } else {
+        cards
+            .select(set)
+            .distinct()
+            .filter(set.is_not_null())
+            .load::<Option<String>>(&mut conn)
+    };
 
-    match cards.filter(id.eq(card_id)).first::<models::Card>(&mut conn) {
-        Ok(card) => HttpResponse::Ok().json(card),
-        Err(e) => {
-            eprintln!("Error fetching card {}: {:?}", card_id, e);
-            HttpResponse::NotFound().body("Card not found")
-        }
-    }
-}
-
-#[actix_web::get("/api/sets")]
-async fn get_sets(pool: web::Data<DbPool>) -> impl Responder {
-    use crate::schema::cards::dsl::{cards, set};
-
-    let mut conn = pool.get().expect("Couldn't get DB connection");
-
-    match cards
-        .select(set)
-        .distinct()
-        .filter(set.is_not_null())
-        .order(set.asc())
-        .load::<Option<String>>(&mut conn)
-    {
-        Ok(set_options) => {
-            let sets: Vec<models::Set> = set_options
+    match sets {
+        Ok(set_list) => HttpResponse::Ok().json(
+            set_list
                 .into_iter()
-                .filter_map(|opt| opt.map(|s| models::Set { name: s }))
-                .collect();
-            HttpResponse::Ok().json(sets)
-        }
+                .map(|s| models::Set { name: s.unwrap() })
+                .collect::<Vec<_>>(),
+        ),
         Err(e) => {
             eprintln!("Error fetching sets: {:?}", e);
             HttpResponse::InternalServerError().body("Error fetching sets")
@@ -96,18 +77,18 @@ async fn get_sets(pool: web::Data<DbPool>) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenv().ok();
-    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
-
-    let pool = establish_connection().expect("Failed to establish DB connection");
+    dotenv::dotenv().ok(); // Load .env file
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let manager = ConnectionManager::<PgConnection>::new(database_url);
+    let pool = r2d2::Pool::builder()
+        .build(manager)
+        .expect("Failed to create pool");
 
     println!("Starting server at http://127.0.0.1:8080");
-
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(pool.clone()))
             .service(get_cards)
-            .service(get_card_by_id)
             .service(get_sets)
     })
         .bind("127.0.0.1:8080")?

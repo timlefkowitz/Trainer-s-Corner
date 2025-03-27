@@ -1,7 +1,7 @@
-use diesel::prelude::*;
-use serde::{Deserialize, Serialize};
+use diesel::Queryable;
+use serde::{Serialize, Deserialize};
 
-#[derive(Serialize, Queryable)]
+#[derive(Queryable, Serialize, Deserialize)]
 pub struct Card {
     pub id: i32,
     pub name: String,
@@ -15,7 +15,7 @@ pub struct Card {
     pub language: Option<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Set {
     pub name: String,
 }
