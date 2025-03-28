@@ -14,4 +14,6 @@ export interface User {
     id: string;
     name: string;
     email?: string;
+    profilePicture?: string; // URL or base64 string for the image
+    metadata?: Record<string, any>; // JSON-like object for extra data
 }
