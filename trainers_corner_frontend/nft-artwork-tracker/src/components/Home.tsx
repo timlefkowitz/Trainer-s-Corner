@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import {Box, Button, Typography} from '@mui/material';
 
 const Home = () => (
     <Box sx={{ textAlign: 'center', py: 4 }}>
