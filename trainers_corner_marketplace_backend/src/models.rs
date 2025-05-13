@@ -27,9 +27,16 @@ pub struct Friendship {
 pub struct Card {
     pub id: i32,
     pub name: String,
-    pub rarity: Option<String>,
-    pub price: Option<i64>, // Matches Nullable<Int8>
+    pub rarity: String,
+    pub price: f64, // Matches Nullable<Int8>
     pub set: Option<String>,
+    pub year: Option<i16>,
+    pub condition: Option<String>,
+    pub image_url: Option<String>,
+    pub card_type: Option<String>,
+    pub language: Option<String>,
+    pub last_sale_price: String,
+    pub last_sale_date: String,
 }
 
 #[derive(Queryable, Selectable, Serialize)]

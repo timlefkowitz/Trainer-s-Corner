@@ -7,6 +7,7 @@ use crate::DbPool;
 use crate::UserId;
 use actix_web::HttpMessage;
 
+
 #[derive(Deserialize)]
 pub struct QueryParams {
     pub set: Option<String>,
@@ -23,6 +24,7 @@ struct PortfolioRequest {
     card_id: i32,
     quantity: Option<i32>,
 }
+
 
 #[get("/api/cards")]
 pub async fn get_cards(pool: web::Data<DbPool>, query: web::Query<QueryParams>) -> impl Responder {
@@ -44,7 +46,23 @@ pub async fn get_cards(pool: web::Data<DbPool>, query: web::Query<QueryParams>) 
     };
     HttpResponse::Ok().json(card_list)
 }
-
+#[get("/api/cards/{id}")]
+pub async fn get_card(pool: web::Data<DbPool>, card_id: web::Path<i32>) -> impl Responder {
+    use crate::schema::cards::dsl::*;
+    let mut conn = pool.get().expect("Couldn't get DB connection");
+    let card = cards
+        .filter(id.eq(*card_id))
+        .first::<Card>(&mut conn)
+        .optional();
+    match card {
+        Ok(Some(card)) => HttpResponse::Ok().json(card),
+        Ok(None) => HttpResponse::NotFound().json("Card not found"),
+        Err(e) => {
+            eprintln!("Error querying card: {:?}", e);
+            HttpResponse::InternalServerError().body("Error querying card")
+        }
+    }
+}
 #[get("/api/following")]
 pub async fn get_following(pool: web::Data<DbPool>, req: HttpRequest) -> impl Responder {
     use crate::schema::friendships::dsl::*;

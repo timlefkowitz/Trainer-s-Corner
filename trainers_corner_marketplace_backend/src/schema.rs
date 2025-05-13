@@ -1,33 +1,40 @@
-use diesel::prelude::*;
+// @generated automatically by Diesel CLI.
 
-table! {
+diesel::table! {
     cards (id) {
         id -> Int4,
-        name -> Varchar,
-        rarity -> Nullable<Varchar>,
-        price -> Nullable<Int8>,
-        set -> Nullable<Varchar>,
+        name -> Text,
+        rarity -> Text,
+        price -> Float8,
+        set -> Nullable<Text>,
+        year -> Nullable<Int2>,
+        condition -> Nullable<Text>,
+        image_url -> Nullable<Text>,
+        card_type -> Nullable<Text>,
+        language -> Nullable<Text>,
+        last_sale_price -> Text,
+        last_sale_date -> Text,
     }
 }
 
-table! {
-    portfolio (id) {
-        id -> Int4,
-        user_id -> Varchar,
-        card_id -> Int4,
-        quantity -> Int4,
-    }
-}
-
-table! {
+diesel::table! {
     friendships (id) {
         id -> Int4,
-        user_id -> Varchar,
-        friend_id -> Varchar,
+        user_id -> Nullable<Varchar>,
+        friend_id -> Nullable<Varchar>,
     }
 }
 
-table! {
+diesel::table! {
+    portfolio (id) {
+        id -> Int4,
+        user_id -> Nullable<Varchar>,
+        card_id -> Nullable<Int4>,
+        quantity -> Nullable<Int4>,
+    }
+}
+
+diesel::table! {
     users (id) {
         id -> Varchar,
         name -> Varchar,
@@ -37,6 +44,12 @@ table! {
     }
 }
 
-// Allow tables to be joined in queries
-allow_tables_to_appear_in_same_query!(users, friendships);
-allow_tables_to_appear_in_same_query!(portfolio, cards);
+diesel::joinable!(portfolio -> cards (card_id));
+diesel::joinable!(portfolio -> users (user_id));
+
+diesel::allow_tables_to_appear_in_same_query!(
+    cards,
+    friendships,
+    portfolio,
+    users,
+);

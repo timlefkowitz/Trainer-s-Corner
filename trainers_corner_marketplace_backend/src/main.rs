@@ -107,6 +107,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(pool.clone()))
             .wrap(Logger::default())
             .wrap(AuthMiddleware)
+            .service(routes::get_card)
             .service(routes::get_cards)
             .service(routes::add_friend)
             .service(routes::get_following)

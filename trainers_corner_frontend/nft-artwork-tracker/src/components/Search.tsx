@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, TextField, Typography } from '@mui/material';
+import '@fontsource/press-start-2p';
 
 interface Card {
     id: number;
@@ -19,7 +20,9 @@ const Search = () => {
     const [results, setResults] = useState<{ cards: Card[]; sets: Set[] }>({ cards: [], sets: [] });
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [cards, setCards] = useState([]);
     const navigate = useNavigate();
+
 
     const handleSearch = async () => {
         if (!searchTerm.trim()) {
@@ -109,7 +112,7 @@ const Search = () => {
                                         Rarity: {card.rarity}
                                     </Typography>
                                     <Typography sx={{ fontFamily: '"Press Start 2P", cursive', fontSize: '0.7rem', color: '#F27405' }}>
-                                        Price: ${card.price}
+                                        Price: {card.price != null ? `$${(card.price / 100).toFixed(2)}` : 'N/A'}
                                     </Typography>
                                 </Box>
                             ))}

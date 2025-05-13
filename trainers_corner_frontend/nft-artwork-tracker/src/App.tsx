@@ -30,6 +30,7 @@ import Social from './components/Social';
 import Portfolio from './components/Portfolio'; // Import the new component
 import { Card, Set, User } from './types';
 import Profile from './components/Profile';
+import CardDetail from './components/CardDetail';
 
 const App = () => {
     const [activeTab, setActiveTab] = useState<string>('/');
@@ -61,6 +62,7 @@ const App = () => {
                         <Route path="/social" element={<Social />} />
                         <Route path="/portfolio" element={<Portfolio />} /> {/* Use the imported component */}
                         <Route path="/profile" element={<Profile />} />
+                        <Route path="/card/:id" element={<CardDetail />} />
                     </Routes>
                 </Box>
                 {/* Navigation bar unchanged */}
