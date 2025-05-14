@@ -1,0 +1,9 @@
+ALTER TABLE friendships
+    ALTER COLUMN user_id SET NOT NULL,
+    ALTER COLUMN friend_id SET NOT NULL;
+
+ALTER TABLE portfolio
+    ALTER COLUMN user_id SET NOT NULL,
+    ALTER COLUMN card_id SET NOT NULL,
+    ALTER COLUMN quantity SET NOT NULL;
+

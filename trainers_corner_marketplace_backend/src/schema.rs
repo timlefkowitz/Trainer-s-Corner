@@ -20,17 +20,17 @@ diesel::table! {
 diesel::table! {
     friendships (id) {
         id -> Int4,
-        user_id -> Nullable<Varchar>,
-        friend_id -> Nullable<Varchar>,
+        user_id -> Varchar,
+        friend_id -> Varchar,
     }
 }
 
 diesel::table! {
     portfolio (id) {
         id -> Int4,
-        user_id -> Nullable<Varchar>,
-        card_id -> Nullable<Int4>,
-        quantity -> Nullable<Int4>,
+        user_id -> Varchar,
+        card_id -> Int4,
+        quantity -> Int4,
     }
 }
 

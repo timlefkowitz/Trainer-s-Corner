@@ -1,8 +1,8 @@
 use actix_web::{get, post, put, web, Responder, HttpResponse, HttpRequest};
 use diesel::prelude::*;
-use serde::Deserialize;
-use crate::schema::{users, friendships, portfolio, cards};
-use crate::models::{User, Friendship, Portfolio, Card};
+use serde::{Deserialize, Serialize};
+use crate::schema::{users, cards};
+use crate::models::{User, Portfolio, Card};
 use crate::DbPool;
 use crate::UserId;
 use actix_web::HttpMessage;
@@ -17,6 +17,12 @@ pub struct QueryParams {
 #[derive(Deserialize)]
 struct FollowRequest {
     friend_id: String,
+}
+
+#[derive(Serialize)]
+struct PortfolioItem {
+    card: Card,
+    quantity: i32,
 }
 
 #[derive(Deserialize)]
@@ -46,6 +52,7 @@ pub async fn get_cards(pool: web::Data<DbPool>, query: web::Query<QueryParams>) 
     };
     HttpResponse::Ok().json(card_list)
 }
+
 #[get("/api/cards/{id}")]
 pub async fn get_card(pool: web::Data<DbPool>, card_id: web::Path<i32>) -> impl Responder {
     use crate::schema::cards::dsl::*;
@@ -63,6 +70,7 @@ pub async fn get_card(pool: web::Data<DbPool>, card_id: web::Path<i32>) -> impl 
         }
     }
 }
+
 #[get("/api/following")]
 pub async fn get_following(pool: web::Data<DbPool>, req: HttpRequest) -> impl Responder {
     use crate::schema::friendships::dsl::*;
@@ -88,6 +96,7 @@ pub async fn get_following(pool: web::Data<DbPool>, req: HttpRequest) -> impl Re
         }
     }
 }
+
 
 #[post("/api/follow")]
 pub async fn add_friend(pool: web::Data<DbPool>, req: HttpRequest, body: web::Json<FollowRequest>) -> impl Responder {
@@ -154,29 +163,41 @@ pub async fn update_user(pool: web::Data<DbPool>, req: HttpRequest, body: web::J
     }
 }
 
-#[get("/api/portfolio")]
+#[get("/portfolio")]
 pub async fn get_portfolio(pool: web::Data<DbPool>, req: HttpRequest) -> impl Responder {
     use crate::schema::portfolio::dsl::*;
     use crate::schema::cards::dsl as cards_dsl;
 
-    let current_user_id = req.extensions()
-        .get::<UserId>()
-        .map(|u| u.0.clone())
-        .unwrap_or("guest".to_string());
-    let mut conn = pool.get().expect("Couldn't get DB connection");
+    let user_id_from_token = req
+        .headers()
+        .get("X-User-Id")
+        .and_then(|h| h.to_str().ok());
 
-    let portfolio_items = portfolio
-        .inner_join(cards::table.on(cards_dsl::id.eq(card_id)))
-        .filter(user_id.eq(current_user_id))
-        .select((Portfolio::as_select(), Card::as_select()))
-        .load::<(Portfolio, Card)>(&mut conn);
+    let user_id_str = match user_id_from_token {
+        Some(uid) => uid.to_string(),
+        None => return HttpResponse::Unauthorized().body("No user ID found in token"),
+    };
 
-    match portfolio_items {
-        Ok(items) => HttpResponse::Ok().json(items),
-        Err(e) => {
-            eprintln!("Error fetching portfolio: {:?}", e);
-            HttpResponse::InternalServerError().body("Error fetching portfolio")
+    let mut conn = match pool.get() {
+        Ok(c) => c,
+        Err(_) => return HttpResponse::InternalServerError().body("Failed to get DB connection"),
+    };
+
+    let result = portfolio
+        .filter(user_id.eq(&user_id))
+        .inner_join(cards::table.on(cards::id.eq(card_id)))
+        .select((cards::all_columns, quantity))
+        .load::<(Card, i32)>(&mut conn);
+
+
+    match result {
+        Ok(data) => {
+            let items: Vec<PortfolioItem> = data.into_iter()
+                .map(|(card, qty)| PortfolioItem { card, quantity: qty })
+                .collect();
+            HttpResponse::Ok().json(items)
         }
+        Err(_) => HttpResponse::InternalServerError().body("Failed to load portfolio"),
     }
 }
 

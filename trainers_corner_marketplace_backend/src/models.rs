@@ -17,8 +17,8 @@ pub struct User {
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Friendship {
     pub id: i32,
-    pub user_id: String,
-    pub friend_id: String, // Non-nullable
+    pub user_id: Option<String>,
+    pub friend_id: Option<String>,
 }
 
 #[derive(Queryable, Selectable, Serialize)]
@@ -28,7 +28,7 @@ pub struct Card {
     pub id: i32,
     pub name: String,
     pub rarity: String,
-    pub price: f64, // Matches Nullable<Int8>
+    pub price: f64,
     pub set: Option<String>,
     pub year: Option<i16>,
     pub condition: Option<String>,
@@ -44,7 +44,7 @@ pub struct Card {
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Portfolio {
     pub id: i32,
-    pub user_id: String, // Non-nullable
-    pub card_id: i32, // Non-nullable
-    pub quantity: i32, // Non-nullable
+    pub user_id: String,
+    pub card_id: i32,
+    pub quantity: i32,
 }
