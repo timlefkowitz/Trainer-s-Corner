@@ -37,6 +37,14 @@ pub struct Card {
     pub language: Option<String>,
     pub last_sale_price: String,
     pub last_sale_date: String,
+    pub hp: Option<String>,
+    pub stage: Option<String>,
+    pub attack1: Option<String>,
+    pub attack2: Option<String>,
+    pub weakness: Option<String>,
+    pub resistance: Option<String>,
+    pub retreat_cost: Option<String>,
+    pub card_number: Option<String>,
 }
 
 #[derive(Queryable, Selectable, Serialize)]

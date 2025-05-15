@@ -14,6 +14,14 @@ diesel::table! {
         language -> Nullable<Text>,
         last_sale_price -> Text,
         last_sale_date -> Text,
+        hp -> Nullable<Varchar>,
+        stage -> Nullable<Varchar>,
+        attack1 -> Nullable<Varchar>,
+        attack2 -> Nullable<Varchar>,
+        weakness -> Nullable<Varchar>,
+        resistance -> Nullable<Varchar>,
+        retreat_cost -> Nullable<Varchar>,
+        card_number -> Nullable<Varchar>,
     }
 }
 
