@@ -17,6 +17,7 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ChartTitle, Tooltip, Legend);
 
+
 interface CardData {
     id: string;
     name: string;
@@ -53,6 +54,8 @@ const CardDetail = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isWatchlisted, setIsWatchlisted] = useState(false);
+
+    console.log("ID from useParams:", id);
 
     useEffect(() => {
         const fetchCard = async () => {

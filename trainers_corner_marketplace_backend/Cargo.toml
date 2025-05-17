@@ -22,3 +22,4 @@ uuid = { version = "0.8", features = [ "v4" ] }
 url = "2.4"
 futures = "0.3.31"
 diesel_json = "0.2"
+actix-cors = "0.6"

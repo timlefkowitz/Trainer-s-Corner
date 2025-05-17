@@ -1,9 +1,12 @@
-use actix_web::{web, App, HttpServer, HttpResponse, Responder, middleware::Logger, get, HttpMessage};
+use actix_web::{web, App, HttpServer, HttpResponse, Responder, middleware::Logger, get, HttpMessage, HttpRequest};
 use actix_web::dev::{ServiceRequest, ServiceResponse, Service, Transform};
 use actix_web::http::header::HeaderValue;
 use diesel::prelude::*;
 use diesel::r2d2::{self, ConnectionManager};
 use futures::future::LocalBoxFuture;
+
+use actix_cors::Cors;
+
 
 mod models;
 mod schema;
@@ -15,6 +18,11 @@ type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 struct UserId(String);
 
 struct AuthMiddleware;
+
+async fn get_card(req: HttpRequest) -> impl Responder {
+    let card_id = req.match_info().get("id").unwrap_or("unknown");
+    HttpResponse::Ok().body(format!("Card id: {}", card_id))
+}
 
 impl<S, B> Transform<S, ServiceRequest> for AuthMiddleware
 where
@@ -61,7 +69,8 @@ where
         let fut = self.service.call(req);
         Box::pin(fut)
     }
-}
+
+
 
 #[get("/api/sets")]
 async fn get_sets(pool: web::Data<DbPool>) -> impl Responder {
@@ -87,6 +96,8 @@ async fn main() -> std::io::Result<()> {
             std::process::exit(1);
         }
     };
+
+
     println!("Connecting to database: {}", database_url);
     let manager = ConnectionManager::<PgConnection>::new(&database_url);
     let pool = match r2d2::Pool::builder().build(manager) {
@@ -103,7 +114,20 @@ async fn main() -> std::io::Result<()> {
     println!("Starting server at http://127.0.0.1:8080");
     match HttpServer::new(move || {
         println!("Initializing app...");
+
+        // Configure CORS to allow requests from your frontend origin
+        let cors = Cors::default()
+            .allowed_origin("http://localhost:3000") // React app origin
+            .allowed_methods(vec!["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+            .allowed_headers(vec![
+                actix_web::http::header::AUTHORIZATION,
+                actix_web::http::header::ACCEPT,
+                actix_web::http::header::CONTENT_TYPE,
+            ])
+            .max_age(3600);
+
         App::new()
+            .wrap(cors)
             .app_data(web::Data::new(pool.clone()))
             .wrap(Logger::default())
             .wrap(AuthMiddleware)

@@ -63,6 +63,7 @@ const App = () => {
                         <Route path="/portfolio" element={<Portfolio />} /> {/* Use the imported component */}
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/card/:id" element={<CardDetail />} />
+                        <Route path="/cards/:id" element={<CardDetail />} />
                     </Routes>
                 </Box>
                 {/* Navigation bar unchanged */}
@@ -117,5 +118,7 @@ const WrappedApp = () => (
         <App />
     </Router>
 );
+
+
 
 export default WrappedApp;
